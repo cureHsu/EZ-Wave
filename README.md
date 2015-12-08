@@ -33,14 +33,14 @@ The setup script will clone Scapy-radio (https://bitbucket.org/cybertools/scapy-
 cd $HOME/scapy-radio
 ./install.sh scapy
 ./install.sh blocks
-'''
+```
 
 Edit [gnuradio prefix]/etc/gnuradio/conf.d
 		Append ":/usr/local/share/gnuradio/grc/blocks" to global_blocks_path
 
-'''
+```
 ./install.sh grc
-'''
+```
 
 ## Install Wireshark dissector
 
