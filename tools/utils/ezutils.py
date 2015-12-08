@@ -4,16 +4,101 @@ Created on Jun 29, 2015
 @author: Joseph Hall
 '''
 
-
+import os
 from scapy.all import * #@UnusedWildImport
-from scapy.layers.ZWave import * #@UnusedWildImport
+#from scapy.layers.ZWave import * #@UnusedWildImport
 from scapy.modules.gnuradio import * #@UnusedWildImport
-from scapy.layers.ZWave import ZWaveReq
+
+class ZWaveNode(object):
+
+    def __init__(self, homeid, nodeid):
+        self.homeid = homeid
+        self.nodeid = nodeid
+        self.manspec = None
+        self.cmdclasses = None
+        self.version = None
+        self.configs = None
+        
+    def display(self, verbose=False):
+        if verbose:
+            print ("\tNodeID " + str(self.nodeid) + ":")
+            print ("\t\tManufacturer: ")
+            print ("\t\tProduct Name: ")
+            print ("\t\tLibrary Type: ")
+            print ("\t\tProtocol Version/Sub-version: ")
+            print ("\t\tApplication Version/Sub-version: \n")
+        else:
+            print ("\tNodeID " + str(self.nodeid))
+
+
+class ZWaveNetwork(object):
+
+    def __init__(self, homeid):
+        self.homeid = homeid
+        self.nodes = dict()
+        
+    def add_node(self, node):
+        if node.nodeid not in self.nodes:
+            self.nodes[node.nodeid] = node
+    
+    def remove_node(self, node):
+        if node.nodeid in self.nodes:
+            del self.nodes[node.nodeid]
+            
+    def display(self, verbose=False):
+        print("*************** Home ID: " + hex(self.homeid) + " *****************")
+        print "Devices:"
+        for node in self.nodes:
+            self.nodes[node].display(verbose)
+        
+        print("\n*****************************************************\n")
+
+
+class PassiveScanner:
+    
+    def __init__(self, timeout):
+        self.seen = dict()
+        self.timeout = timeout   
+    
+    @staticmethod
+    def verify_checksum(packet):
+        p = bytearray(str(packet))
+        p = p[8:-1]
+        calc_crc = hex(reduce(lambda x, y: x ^ y, p, 0xFF))
+        crc_byte = packet[ZWaveReq].get_field('crc').i2repr(packet, packet.crc)
+        if (calc_crc == crc_byte): return True
+        else: return False
+
+    def display(self):
+        print("\n******************* Passive Scan Results *******************\n")
+        for homeid in self.seen:
+            self.seen[homeid].display()
+            
+    def handle_packets(self, packet):
+        if self.verify_checksum(packet) == False:
+            #print "Checksum Error: Ignoring Frame..."
+            return
+
+        if packet.homeid not in self.seen:
+            print "[+] Found new Zwave network: " + hex(packet.homeid)
+            self.seen[packet.homeid] = ZWaveNetwork(packet.homeid)
+        for nodeid in (packet.src, packet.dst):
+            if nodeid not in self.seen[packet.homeid].nodes:
+                print "[+][+] Found new Zwave node: " + hex(packet.homeid) + " node " + str(nodeid)
+                self.seen[packet.homeid].add_node(ZWaveNode(packet.homeid, nodeid))
+    
+    def run(self):       
+        load_module('gnuradio')
+        print "Scanning for " + str(self.timeout) + " seconds..."
+        
+        sniffradio(radio="Zwave", store=0, count=None, timeout=self.timeout,
+                       prn=lambda p: self.handle_packets(p),
+                       lfilter=lambda x: x.haslayer(ZWaveReq))
+        
+        return self.seen
+    
 
 class Zwave_Automaton(Automaton):
-    '''
-    classdocs
-    '''
     
     def parse_args(self, request, expected_response, preamble_length=80, *args, **kargs):
         Automaton.parse_args(self, *args, **kargs)
