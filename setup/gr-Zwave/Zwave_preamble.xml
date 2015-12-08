@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<block>
+ 	<name>Preamble</name>
+  	<key>Zwave_preamble</key>
+  	<category>ZWAVE</category>
+  	<import>import Zwave</import>
+  	<make>Zwave.preamble($preamble_length)</make>
+  	<callback>set_preamble($preamble_length)</callback>
+  	<param>
+    		<name>preamble length</name>
+		<key>preamble_length</key>
+    		<type>int</type>
+  	</param>
+  	<sink>
+    		<name>in</name>
+    		<type>message</type>
+  	</sink>
+  	<source>
+    		<name>out</name>
+    		<type>message</type>
+  	</source>
+</block>
