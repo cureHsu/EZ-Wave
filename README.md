@@ -1,5 +1,5 @@
 # EZ-Wave
-EZ-Wave: Tools for Attacking and Evaluating Z-Wave Networks using Software-Defined Radios.
+EZ-Wave: Tools for Evaluating and Exploiting Z-Wave Networks using Software-Defined Radios.
 
 # Requirements
 
