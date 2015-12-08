@@ -139,8 +139,7 @@ guint8 calc_checksum_tvb (tvbuff_t *tvb, size_t offset, size_t len)
 	return sum;
 }
 
-static void
-dissect_zwave (tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
+static int dissect_zwave (tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void* data _U_)
 {
 	
 	guint offset = 0;
@@ -242,7 +241,7 @@ dissect_zwave (tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
 		call_dissector(data_handle, next_tvb, pinfo, tree);
 	
 	}
-	
+    return tvb_captured_length(tvb);
 }
 
 void

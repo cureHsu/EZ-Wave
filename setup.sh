@@ -9,7 +9,7 @@ scapy_radio_clone(){
 	cp setup/gr-Zwave/Zwave_preamble.xml ${HOME}/scapy-radio/gnuradio/gr-Zwave/grc/
 	cp setup/install.sh ${HOME}/scapy-radio/
 	chmod 755 ${HOME}/scapy-radio/install.sh
-	cp setup/Zwave.grc ${HOME}/scapy-radio
+	cp setup/Zwave.grc ${HOME}/scapy-radio/gnuradio/grc
 	cp setup/scapy/layers/* ${HOME}/scapy-radio/scapy/scapy/layers
 	cp setup/scapy/modules/* ${HOME}/scapy-radio/scapy/scapy/modules
 	rm -rf ${HOME}/scapy-radio/utils

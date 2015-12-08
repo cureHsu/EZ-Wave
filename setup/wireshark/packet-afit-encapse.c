@@ -47,8 +47,7 @@ static const value_string afit_zwave_channel_type_names[] = {
 	{   0x5, "Zwave Channel Config 3, Rate 3" }
 };
 
-static void
-dissect_afit_encap (tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
+static int dissect_afit_encap (tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void* data _U_)
 {
 	int offset = 0;
 	int type = tvb_get_guint8 (tvb, 0);
@@ -91,7 +90,7 @@ dissect_afit_encap (tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
 		}
 
 	}
-
+	return tvb_captured_length(tvb);
 }
 
 void
@@ -139,8 +138,7 @@ proto_register_afit_encap (void)
 	);
 
 	
-  	afit_encap_dissector_table = register_dissector_table("afit_encap.encap_type", "Temporary Encapsulation Type for ZWAVE dissector",
-                                                FT_UINT8, BASE_DEC);	
+  	afit_encap_dissector_table = register_dissector_table("afit_encap.encap_type", "Temporary Encapsulation Type for ZWAVE dissector", FT_UINT8, BASE_DEC, DISSECTOR_TABLE_NOT_ALLOW_DUPLICATE);	
 	proto_register_field_array (proto_afit_encap, hf, array_length (hf));
 	proto_register_subtree_array (ett, array_length (ett));
 }
@@ -151,7 +149,7 @@ proto_reg_handoff_afit_encap (void)
 	static dissector_handle_t afit_encap_handle;
  	
 	data_handle = find_dissector("data");
-	afit_encap_handle = create_dissector_handle (dissect_afit_encap, proto_afit_encap);
+    afit_encap_handle = create_dissector_handle (dissect_afit_encap, proto_afit_encap);
 	dissector_add_uint("udp.port", AFIT_ENCAP_UDP_PORT, afit_encap_handle);
 
 }
