@@ -1,0 +1,14 @@
+##
+## $Id$
+## Here you can add custom dissectors
+#
+
+CUSTOM_DISSECTOR_SRC = \
+	packet-afit-encapse.c\
+	packet-zwave.c
+
+CUSTOM_DIRTY_ASN1_DISSECTOR_SRC =
+
+CUSTOM_HEADER_FILES = \
+	packet-afit-encapse.h\
+	packet-zwave.h
