@@ -4,9 +4,8 @@ Created on Jun 29, 2015
 @author: Joseph Hall
 '''
 
-import os
 from scapy.all import * #@UnusedWildImport
-#from scapy.layers.ZWave import * #@UnusedWildImport
+from scapy.layers.ZWave import * #@UnusedWildImport
 from scapy.modules.gnuradio import * #@UnusedWildImport
 
 class ZWaveNode(object):
@@ -52,50 +51,6 @@ class ZWaveNetwork(object):
             self.nodes[node].display(verbose)
         
         print("\n*****************************************************\n")
-
-
-class PassiveScanner:
-    
-    def __init__(self, timeout):
-        self.seen = dict()
-        self.timeout = timeout   
-    
-    @staticmethod
-    def verify_checksum(packet):
-        p = bytearray(str(packet))
-        p = p[8:-1]
-        calc_crc = hex(reduce(lambda x, y: x ^ y, p, 0xFF))
-        crc_byte = packet[ZWaveReq].get_field('crc').i2repr(packet, packet.crc)
-        if (calc_crc == crc_byte): return True
-        else: return False
-
-    def display(self):
-        print("\n******************* Passive Scan Results *******************\n")
-        for homeid in self.seen:
-            self.seen[homeid].display()
-            
-    def handle_packets(self, packet):
-        if self.verify_checksum(packet) == False:
-            #print "Checksum Error: Ignoring Frame..."
-            return
-
-        if packet.homeid not in self.seen:
-            print "[+] Found new Zwave network: " + hex(packet.homeid)
-            self.seen[packet.homeid] = ZWaveNetwork(packet.homeid)
-        for nodeid in (packet.src, packet.dst):
-            if nodeid not in self.seen[packet.homeid].nodes:
-                print "[+][+] Found new Zwave node: " + hex(packet.homeid) + " node " + str(nodeid)
-                self.seen[packet.homeid].add_node(ZWaveNode(packet.homeid, nodeid))
-    
-    def run(self):       
-        load_module('gnuradio')
-        print "Scanning for " + str(self.timeout) + " seconds..."
-        
-        sniffradio(radio="Zwave", store=0, count=None, timeout=self.timeout,
-                       prn=lambda p: self.handle_packets(p),
-                       lfilter=lambda x: x.haslayer(ZWaveReq))
-        
-        return self.seen
     
 
 class Zwave_Automaton(Automaton):
@@ -136,32 +91,32 @@ class Zwave_Automaton(Automaton):
         raise self.WAITING()
     @ATMT.action(begin)
     def initial_tx(self):
-        print "initial_tx"
+        #print "initial_tx"
         for _ in range(0,3):
             send(self.request, verbose=False)
     
     
     @ATMT.state()
     def WAITING(self):
-        print "WAITING"
+        #print "WAITING"
         pass            
     @ATMT.receive_condition(WAITING)
     def valid_response(self, pkt):
-        #pkt.show()
-        print "valid_response"
+        pkt[ZWaveReq].show()
+        #print "valid_response"
         if self.response[ZWaveReq].headertype == pkt[ZWaveReq].headertype:
-            print "Same headertype"
+            #print "Same headertype"
             if self.response[ZWaveReq].headertype == 3:
-                print "Ack"
+                #print "Ack"
                 raise self.END(pkt[ZWaveReq])
             if pkt[ZWaveReq].cmd_class == self.response[ZWaveReq].cmd_class:
-                print "Right Command Class"
+                #print "Right Command Class"
                 #Logic to check if GET
                 raise self.END(pkt[ZWaveReq])
         #raise self.END(pkt) 
     @ATMT.receive_condition(WAITING, prio=1)
     def invalid_response(self, pkt):
-        print "invalid_response"
+        #print "invalid_response"
         if self.tries >= self.retries:
             raise self.ERROR()
         else:
@@ -171,8 +126,8 @@ class Zwave_Automaton(Automaton):
     
     @ATMT.timeout(WAITING, 4)
     def waiting_timeout(self):
-        print "timeout"
-        print "tries: " + str(self.tries)
+        #print "timeout"
+        #print "tries: " + str(self.tries)
         if self.tries >= self.retries:
             raise self.ERROR()
         else:
@@ -183,7 +138,7 @@ class Zwave_Automaton(Automaton):
     @ATMT.action(invalid_response)
     @ATMT.action(waiting_timeout)
     def retransmit(self):
-        print "retransmit"
+        #print "retransmit"
         if self.tries >= self.retries:
             for _ in range(0,3):
                 send(self.request, verbose=False)
@@ -191,14 +146,84 @@ class Zwave_Automaton(Automaton):
     
     @ATMT.state(final=1)
     def ERROR(self):      
-        print "ERROR"  
+        #print "ERROR"
+        gnuradio_exit(conf)
         return None
         
     
     @ATMT.state(final=1)
     def END(self, pkt):
-        print "END"
+        #print "END"
         gnuradio_exit(conf)
         return pkt    
 
         
+class PassiveScanner:
+
+    def __init__(self, timeout):
+        self.seen = dict()
+        self.timeout = timeout
+
+    @staticmethod
+    def verify_checksum(packet):
+        p = bytearray(str(packet))
+        p = p[8:-1]
+        calc_crc = hex(reduce(lambda x, y: x ^ y, p, 0xFF))
+        crc_byte = packet[ZWaveReq].get_field('crc').i2repr(packet, packet.crc)
+        if (calc_crc == crc_byte): return True
+        else: return False
+
+    def display(self):
+        print("\n******************* Passive Scan Results *******************\n")
+        for homeid in self.seen:
+            self.seen[homeid].display()
+
+    def handle_packets(self, packet):
+
+        if self.verify_checksum(packet) == False:
+            #print "Checksum Error: Ignoring Frame..."
+            return
+        if packet.homeid not in self.seen:
+            print "[+] Found new Zwave network: " + hex(packet.homeid)
+            self.seen[packet.homeid] = ZWaveNetwork(packet.homeid)
+        for nodeid in (packet.src, packet.dst):
+            if nodeid not in self.seen[packet.homeid].nodes:
+                print "[+][+] Found new Zwave node: " + hex(packet.homeid) + " node " + str(nodeid)
+                self.seen[packet.homeid].add_node(ZWaveNode(packet.homeid, nodeid))
+
+    @property
+    def run(self):
+        load_module('gnuradio')
+        print "Scanning for " + str(self.timeout) + " seconds..."
+
+        sniffradio(radio="Zwave", store=0, count=None, timeout=self.timeout,
+                       prn=lambda p: self.handle_packets(p),
+                       lfilter=lambda x: x.haslayer(ZWaveReq))
+        gnuradio_exit(conf)
+        return self.seen
+
+
+class ActiveScanner:
+
+    def __init__(self, network):
+        self.network = network
+        self.max_node = 63
+        self.request = ZWave(src=1, homeid=self.network.homeid, ackreq=1) / ZWaveNOP()
+        self.response = ZWave(homeid=self.network.homeid, headertype=3, dst=1)
+
+    def run(self):
+        print "Active Scan of " + hex(self.network.homeid)
+
+        #loop through all possible nodeids
+        for i in range(63, self.max_node+1):
+            #skip if the nodeid has already been seen
+            #if i not in self.network.nodes:
+            self.request.dst = i
+            self.response.src = i
+            self.request.show()
+            self.response.show()
+            ping = Zwave_Automaton(self.request, self.response).run()
+            if ping is not None:
+                self.network.add_node(ZWaveNode(self.network.homeid, i))
+
+        return self.network

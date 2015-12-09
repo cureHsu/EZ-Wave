@@ -8,12 +8,12 @@ _seen = dict()
 
 def passive_scan(timeout):
     global _seen
-    _seen = PassiveScanner(timeout).run()
+    _seen = PassiveScanner(timeout).run
     #scanner.display()
 
 def active_scan(homeid):
     global _seen 
-    #_seen[homeid] = ActiveScanner(_seen[homeid]).run()
+    _seen[homeid] = ActiveScanner(_seen[homeid]).run()
 
 
 def display():
@@ -39,13 +39,16 @@ if __name__ == "__main__":
     if not args.passive and args.active:
         if args.homeid is None:
             sys.exit("Please provide a 4 byte HomeID to scan (ex: --homeid=0x1a2b3c4d)")
+        print args.homeid
+        _seen[args.homeid] = ZWaveNetwork(args.homeid)
         active_scan(args.homeid)
     elif args.passive and not args.active:
         passive_scan(args.timeout)
     else:
         passive_scan(args.timeout)
         for homeid in _seen:
-            time.sleep(3)
+            print hex(homeid)
+            #time.sleep(3)
             active_scan(homeid)
 
     display()
