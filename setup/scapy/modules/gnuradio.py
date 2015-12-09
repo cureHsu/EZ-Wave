@@ -192,7 +192,6 @@ def switch_radio_protocol(layer, *args, **kargs):
         print ""
         raise AttributeError("Unknown radio layer %s" % layer)
     if conf.gr_process is not None:
-        print "An instance is already running"
         conf.gr_process.kill()
         conf.gr_process = None
     try:

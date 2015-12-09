@@ -26,18 +26,6 @@ scapy_update() {
 	python -m py_compile /usr/local/lib/python2.7/dist-packages/scapy/layers/ZWave.py
 	python -m py_compile /usr/local/lib/python2.7/dist-packages/scapy/layers/gnuradio.py
 	python -m py_compile /usr/local/lib/python2.7/dist-packages/scapy/modules/gnuradio.py
-	rm /usr/lib/python2.7/dist-packages/scapy/layers/ZWave*
-    rm /usr/lib/python2.7/dist-packages/scapy/layers/gnuradio*
-    rm /usr/lib/python2.7/dist-packages/scapy/modules/gnuradio*
-	cp setup/scapy/layers/ZWave.py /usr/lib/python2.7/dist-packages/scapy/layers/
-    cp setup/scapy/layers/gnuradio.py /usr/lib/python2.7/dist-packages/scapy/layers/
-    cp setup/scapy/modules/gnuradio.py /usr/lib/python2.7/dist-packages/scapy/modules/
-    python -m py_compile /usr/lib/python2.7/dist-packages/scapy/layers/ZWave.py
-    python -m py_compile /usr/lib/python2.7/dist-packages/scapy/layers/gnuradio.py
-    python -m py_compile /usr/lib/python2.7/dist-packages/scapy/modules/gnuradio.py
-    cp $HOME/scapy-radio/scapy/scapy/layers/dot15d4.py /usr/lib/python2.7/dist-packages/scapy/layers/
-    cp $HOME/scapy-radio/scapy/scapy/layers/bluetooth4LE.py /usr/lib/python2.7/dist-packages/scapy/layers/
-    cp $HOME/scapy-radio/scapy/scapy/layers/wmbus.py /usr/lib/python2.7/dist-packages/scapy/layers/
 }
 
 
