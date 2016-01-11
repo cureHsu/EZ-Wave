@@ -1,6 +1,16 @@
 # EZ-Wave
 EZ-Wave: Tools for Evaluating and Exploiting Z-Wave Networks using Software-Defined Radios.
 
+ezstumbler: passive Z-Wave network discovery and active network enumeration
+
+ezrecon: Z-Wave device interrogation including:
+	- Manufacturer and device name
+	- Software/firmware versions
+	- Supported Z-Wave command classes
+	- Device configuration settings
+
+ezfingerprint: determines device's Z-Wave module generation (3rd of 5th gen) using a PHY layer manipulation technique (preamble length manipulation).
+
 # Requirements
 
 **Tested on Ubuntu 14.04 only
@@ -58,6 +68,45 @@ sudo ldconfig
 
 ##ezstumbler
 
-##ezfingerprint
+ezstumbler.py [-h, --help] [-p, --passive] [-t, --timeout] [-a, --active] [--homeid]
+	-p, --passive		Conduct a passive scan for a set time (secs)
+	-t, --timeout		Timeout (secs) for scans, default=60
+	-a, --active		Conduct an active scan for a set time (secs)
+	--homeid		4 byte HomeID to scan (ex: 0x1a2b3c4d)
+
+30s passive followed by active scan:
+```
+ezstumbler.py --timeout=30
+```
+
+passive scan:
+```
+ezstumbler.py --passive
+```
+
+active scan:
+```
+ezstumbler.py --active --homeid=0x1a2b3d4e
+```
 
 ##ezrecon
+
+ezrecon.py [-h, --help] [-c, --config] [-t, --timeout] homeid nodeid
+	homeid			4 byte HomeID of target network (ex: 0x1a2b3c4d)
+	nodeid			Target device NodeID (in decimal, <233)
+	-c, --config		Include scan of device configuration settings (takes a while)
+	-t, --timeout		Stop scanning after a given time (secs, default=30)
+
+```
+ezrecon.py 0x1a2b3c4d 20
+```
+
+##ezfingerprint
+
+ezfingerprint.py homeid nodeid
+	homeid			4 byte HomeID of target network (ex: 0x1a2b3c4d)
+	nodeid			Target device NodeID (in decimal, <233)
+
+```
+ezfingerprint.py 0x1a2b3c4d 20
+```

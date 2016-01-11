@@ -141,7 +141,10 @@ class ZWaveReq(BaseZWave):
     ]
     
     def pre_dissect(self, s):
-        return s[:10] + s[-1] + s[10:-1]
+        if len(s) == 10:
+            return s
+        else:
+            return s[:10] + s[-1] + s[10:-1]
 
 class ZWaveNOP(Packet):
     name = "ZWaveNOP"
