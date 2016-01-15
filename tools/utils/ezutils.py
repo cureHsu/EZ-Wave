@@ -29,6 +29,7 @@ class ZWaveNode(object):
         self.manspec = None
         self.cmdclasses = None
         self.version = None
+        self.basic = None
         self.configs = None
 
 
@@ -37,7 +38,7 @@ class ZWaveNode(object):
         if self.manspec is None:
             response = "\tManufacturer: Unknown \n\tProduct Name: Unknown "
         else:
-            tree = ET.parse(urlopen('https://raw.githubusercontent.com/OpenZWave/open-zwave/master/config/manufacturer_specific.xml'))
+            tree = ET.parse('/home/ezwave/open-zwave/config/manufacturer_specific.xml')#urlopen('https://raw.githubusercontent.com/OpenZWave/open-zwave/master/config/manufacturer_specific.xml'))
             root = tree.getroot()
             xmlns="{http://code.google.com/p/open-zwave/}"
             for manufacturer in root.iter(xmlns+'Manufacturer'):
@@ -79,7 +80,20 @@ class ZWaveNode(object):
                 if cc in _COMMAND_CLASS:
                     response += "\n\t\t" + _COMMAND_CLASS[cc] + " (" + hex(cc)+ ")"
                 else:
-                    response += "\n\t\t Unknown (" + hex(cc)+ ")"
+                    response += "\n\t\tUnknown (" + hex(cc)+ ")"
+        return response
+
+
+    def parse_basic(self):
+        response = "\tBasic Status: "
+        if self.basic is None:
+            response += "Unknown"
+        elif self.basic == chr(0).encode("HEX"):
+            response += "Off (0x00)"
+        elif self.basic == chr(255).encode("HEX"):
+            response += "On (0xFF)"
+        else:
+            response += "Unknown (0x" + self.basic + ")"
         return response
 
 
@@ -96,10 +110,12 @@ class ZWaveNode(object):
 
     def display(self, verbose=False):
         if verbose:
+            self.fix()
             print "NodeID " + str(self.nodeid) + ":"
             print self.parse_manspec()
             print self.parse_version()
             print self.parse_cmd_classes()
+            print self.parse_basic()
             print self.parse_configs()
         else:
             print ("\tNodeID " + str(self.nodeid))
@@ -331,7 +347,7 @@ class ActiveScanner:
                 for _ in range(0,3):
                     send(pkt, verbose=False)
                 time.sleep(3)
-
+            time.sleep(5)
             os._exit(0)
         else:
             sniffradio(radio="Zwave", store=0, count=None, timeout=self.timeout,

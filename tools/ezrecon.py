@@ -33,6 +33,9 @@ def handle_packets(packet, target):
             elif packet.cmd_class == 0x01:
                 target.cmdclasses = str(packet[Raw])[6:].encode("HEX")
                 return
+            elif packet.cmd_class == 0x20 and packet.cmd == 0x03:
+                target.basic = str(packet[Raw]).encode("HEX")
+                return
             elif packet.cmd_class == 0x70 and packet.cmd == 0x06:
                 target.configs[str(packet[Raw])[:2].encode("HEX")] = str(packet[Raw])[2:].encode("HEX")
 
@@ -58,6 +61,7 @@ if __name__ == "__main__":
 
     manspec = ZWave(homeid=homeid, dst=nodeid) / ZWaveManufacturerSpecific(cmd="GET")
     version = ZWave(homeid=homeid, dst=nodeid) / ZWaveVersion(cmd="GET")
+    basic = ZWave(homeid=homeid, dst=nodeid) / ZWaveBasic(cmd="GET")
     nif = ZWave(homeid=homeid, dst=nodeid) / ZWaveNodeInfo() / chr(2)
     if args.config:
         config = ZWave(homeid=homeid, ackreq=1, dst=nodeid) / ZWaveConfiguration(cmd="GET")
@@ -76,6 +80,9 @@ if __name__ == "__main__":
             time.sleep(2)
             for _ in range(0,3):
                 send(version, verbose=False)
+            time.sleep(2)
+            for _ in range(0,3):
+                send(basic, verbose=False)
             time.sleep(2)
             for _ in range(0,3):
                 send(nif, verbose=False)

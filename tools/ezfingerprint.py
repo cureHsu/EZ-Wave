@@ -14,9 +14,12 @@ if __name__ == "__main__":
     args = parser.parse_args(sys.argv[1:])
 
     homeid = int(args.homeid,16)
+    print "Scanning " + str(args.nodeid) + " with standard preamble"
     network = ActiveScanner(ZWaveNetwork(homeid), timeout=10, nodeid=args.nodeid, strict=True).run
 
     if args.nodeid in network.nodes:
+        print "Node " + str(args.nodeid) + " found"
+        print "Scanning " + str(args.nodeid) + " with shortened preamble"
         network=None
         network = ActiveScanner(ZWaveNetwork(homeid), timeout=10, nodeid=args.nodeid, preamble_len=16, strict=True).run
         if args.nodeid in network.nodes:
