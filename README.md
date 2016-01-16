@@ -9,7 +9,7 @@ ezrecon: Z-Wave device interrogation including:
 	- Supported Z-Wave command classes
 	- Device configuration settings
 
-ezfingerprint: determines device's Z-Wave module generation (3rd of 5th gen) using a PHY layer manipulation technique (preamble length manipulation).
+ezfingerprint: determines device's Z-Wave module generation (3rd or 5th gen) using a PHY layer manipulation technique (preamble length manipulation).
 
 # Requirements
 
