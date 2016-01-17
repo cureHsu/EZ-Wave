@@ -38,7 +38,7 @@ class ZWaveNode(object):
         if self.manspec is None:
             response = "\tManufacturer: Unknown \n\tProduct Name: Unknown "
         else:
-            tree = ET.parse('/home/ezwave/open-zwave/config/manufacturer_specific.xml')#urlopen('https://raw.githubusercontent.com/OpenZWave/open-zwave/master/config/manufacturer_specific.xml'))
+            tree = ET.parse(urlopen('https://raw.githubusercontent.com/OpenZWave/open-zwave/master/config/manufacturer_specific.xml'))
             root = tree.getroot()
             xmlns="{http://code.google.com/p/open-zwave/}"
             for manufacturer in root.iter(xmlns+'Manufacturer'):
